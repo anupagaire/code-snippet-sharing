@@ -17,9 +17,25 @@ model Snippet {
 }
 
 model User {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
+  id                   String              @id @default(auto()) @map("_id") @db.ObjectId
+  name                 String?
+  email                String?             @unique
+  emailVerified        DateTime?
+  image                String?
+  password             String?
+  phoneNumber          String?
+  sessions             Session[]
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+
+  @@map("users")
+}
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique
+  userId       String   @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }

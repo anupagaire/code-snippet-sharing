@@ -1,30 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "../ui/input";
-import Image from "next/image";
-import {
-  User,
-  Search,
-  Menu,
-  X,
-  LogOut,
-} from "lucide-react";
+import { User, Search, Menu, X, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
-// import { useSession, signOut } from "next-auth/react";
 
 const Navbar = () => {
   const router = useRouter();
 
-//   const { data: session } = useSession();
-
-  const [mounted, setMounted] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userFirstName, setUserFirstName] = useState("User");
 
-//   const userFirstName = session?.user?.name?.split(" ")[0] || "User";
-
+  useEffect(() => {
+    const token = localStorage.getItem("user-token");
+    const name = localStorage.getItem("user-name");
+    if (token) setIsLoggedIn(true);
+    if (name) setUserFirstName(name.split(" ")[0]);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +29,12 @@ const Navbar = () => {
     setMenuOpen(false);
   };
 
-  const handleLogout = async () => {
-    await signOut({ callbackUrl: "/" });
+  const handleLogout = () => {
+    // Remove the same keys that were used on login
+    localStorage.removeItem("user-token");
+    localStorage.removeItem("user-name");
+    setIsLoggedIn(false);
+    router.push("/login");
     setMenuOpen(false);
   };
 
@@ -46,53 +45,46 @@ const Navbar = () => {
           <Menu size={28} />
         </button>
 
-       <Link href="/" className="ml-3 flex items-center gap-2">
-  <span className="text-white text-lg font-bold">SHARING TOOL</span>
-</Link>
+        <Link href="/" className="ml-3 flex items-center gap-2">
+          <span className="text-white text-lg font-bold">SHARING TOOL</span>
+        </Link>
 
-        {/* <div className="ml-auto flex items-center gap-4">
-  {session ? (
-    <Link
-      href="/user"
-      className="flex items-center gap-1 text-white text-sm"
-    >
-      <User size={18} />
-      <span className=" sm:inline">
-        {userFirstName}
-      </span>
-    </Link>
-  ) : (
-    <Link
-      href="/auth/login"
-      className="text-white"
-    >
-      <User size={20} />
-    </Link>
-  )}
-
-</div> */}
+        <div className="ml-auto flex items-center gap-4">
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1 text-white text-sm"
+            >
+              <User size={18} />
+              <span>{userFirstName}</span>
+            </button>
+          ) : (
+            <Link href="/login" className="text-white">
+              <User size={20} />
+            </Link>
+          )}
+        </div>
       </nav>
 
       <div className="md:hidden bg-black px-4 py-2">
-    
         <form onSubmit={handleSearch} className="relative">
           <Input
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Serach snippets..."
+            placeholder="Search snippets..."
             className="rounded-full bg-white text-black"
           />
           <button className="absolute right-3 top-1/2 -translate-y-1/2">
             <Search size={18} />
           </button>
         </form>
-        
       </div>
 
+      {/* Desktop Navbar */}
       <nav className="hidden md:flex sticky top-0 z-50 h-16 bg-black px-20 items-center">
         <Link href="/" className="ml-3 flex items-center gap-2">
-  <span className="text-white text-lg font-bold">SHARING TOOL</span>
-</Link>
+          <span className="text-white text-lg font-bold">SHARING TOOL</span>
+        </Link>
 
         <div className="ml-auto flex items-center gap-6">
           <form onSubmit={handleSearch} className="relative">
@@ -107,32 +99,31 @@ const Navbar = () => {
             </button>
           </form>
 
+          <Link
+            href="/create"
+            className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-medium"
+          >
+            + New Snippet
+          </Link>
 
-    <Link
-  href="/create"
-  className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-medium"
->
-  + New Snippet
-</Link>
-          {/* {session ? (
+          {isLoggedIn ? (
             <div className="flex items-center gap-3 text-white">
-              <Link href="/user">Hi, {userFirstName}</Link>
+              <span>Hi, {userFirstName}</span>
               <button onClick={handleLogout}>
                 <LogOut size={20} />
               </button>
             </div>
           ) : (
-            <Link className="text-white" href="/auth/login">
+            <Link className="text-white" href="/login">
               <User size={22} />
             </Link>
-          )} */}
+          )}
         </div>
       </nav>
 
+      {/* Mobile Side Menu */}
       <div
-        className={`fixed inset-0 z-9999 bg-black/40 ${
-          menuOpen ? "block" : "hidden"
-        }`}
+        className={`fixed inset-0 z-50 bg-black/40 ${menuOpen ? "block" : "hidden"}`}
         onClick={() => setMenuOpen(false)}
       >
         <div
@@ -146,22 +137,24 @@ const Navbar = () => {
             </button>
           </div>
 
+          <div className="flex flex-col gap-4 text-lg">
+            <Link
+              href="/create"
+              className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-medium"
+            >
+              + New Snippet
+            </Link>
 
-
- <div className="flex flex-col gap-4 text-lg">
- 
-    <Link
-  href="/create"
-  className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-medium"
->
-  + New Snippet
-</Link>
-
- 
-</div>
-
-
-
+            {isLoggedIn ? (
+              <button onClick={handleLogout} className="flex items-center gap-2">
+                <LogOut size={20} /> Logout
+              </button>
+            ) : (
+              <Link href="/login" className="flex items-center gap-2">
+                <User size={20} /> Login
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </>
