@@ -23,19 +23,23 @@ npx shadcn@latest add form
 npx shadcn@latest add input
 npx shadcn@latest add separator
 ```
-
-
 ## For database dashboard
+```bash
 ### npx prisma studio
-
+```
 ## for JWT authentication
+```bash
 ### npm install jsonwebtoken
 ### npm install bcryptjs
 ### npm install --save-dev @types/jsonwebtoken
 (This will give TypeScript proper types for jsonwebtoken)
+```
+
 
 Working process:
 Password is hashed with bcryptjs
 JWT token is returned along with the user
 Frontend can store token in localStorage or cookies
 
+
+### npm install prismjs(code highlighter library)

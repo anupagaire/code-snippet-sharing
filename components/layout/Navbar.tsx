@@ -100,7 +100,7 @@ const Navbar = () => {
           </form>
 
           <Link
-            href="/create"
+            href="/snippets/create"
             className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-medium"
           >
             + New Snippet
@@ -139,7 +139,7 @@ const Navbar = () => {
 
           <div className="flex flex-col gap-4 text-lg">
             <Link
-              href="/create"
+              href="/snippets/create"
               className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full text-sm font-medium"
             >
               + New Snippet

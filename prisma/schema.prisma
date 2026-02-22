@@ -11,7 +11,8 @@ model Snippet {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   language  String
   codeBlock String
-  author    String
+  authorId  String   @db.ObjectId
+  author    User     @relation(fields: [authorId], references: [id])
   tags      String[]
   createdAt DateTime @default(now())
 }

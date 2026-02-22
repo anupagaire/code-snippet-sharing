@@ -11,15 +11,11 @@ const MainLayout = ({ children }: { children: ReactNode }) => {
   const isAdminRoute = pathname.startsWith("/status");
 
   return (
-    <main className="min-h-screen relative">
-      {!isAdminRoute && <Navbar />}
-
-      <div className="pt-0">{children}</div>
-      {!isAdminRoute && <Footer />}
-
-
-    
-    </main>
+  <main className="min-h-screen flex flex-col">
+  {!isAdminRoute && <Navbar />}
+  <div className="flex-1 pt-0">{children}</div>
+  {!isAdminRoute && <Footer />}
+</main>
   );
 };
 

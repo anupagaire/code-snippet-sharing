@@ -1,13 +1,47 @@
-import Image from "next/image";
+
+"use client";
+
+import { useEffect, useState } from "react";
+import Prism from "prismjs";
+import "prismjs/themes/prism-tomorrow.css"; 
+
+interface Snippet {
+  id: string;
+  language: string;
+  codeBlock: string;
+  author: string;
+  createdAt: string;
+}
 
 export default function Home() {
+  const [snippets, setSnippets] = useState<Snippet[]>([]);
+
+  useEffect(() => {
+    fetch("/api/snippets")
+      .then(res => res.json())
+      .then(data => setSnippets(data));
+  }, []);
+
+  // Highlight code whenever snippets change
+  useEffect(() => {
+    Prism.highlightAll();
+  }, [snippets]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-       
-       
-      
-      </main>
+    <div className="max-w-4xl mx-auto mt-10 px-4">
+      <h1 className="text-2xl font-bold mb-6">All Snippets</h1>
+      {snippets.map((snippet) => (
+        <div key={snippet.id} className="mb-6 bg-gray-900 p-4 rounded-lg">
+          <div className="text-sm text-gray-400 mb-2">
+            {snippet.language} — by {snippet.author}
+          </div>
+          <pre>
+            <code className={`language-${snippet.language.toLowerCase()}`}>
+              {snippet.codeBlock}
+            </code>
+          </pre>
+        </div>
+      ))}
     </div>
   );
 }
