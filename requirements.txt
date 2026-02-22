@@ -1,0 +1,33 @@
+Functional Requirements
+ These are features your app must have:
+
+1.User Management
+ Register / Login / Logout
+ JWT authentication
+ Only logged-in users can post snippets
+ (User role:Guest and logged in user)
+
+2.Snippet Management
+ Create / Read snippets
+ Each snippet has:
+  Language (JS, Python…)
+  CodeBlock (text)
+  Author
+  Tags
+  CreatedAt
+  Filter snippets by language / tags
+  Copy code button
+  Search by language, tags, or keyword
+
+3.UI Features
+  Syntax highlighting for code
+  Responsive Navbar
+  Toast notifications like “Copied!”
+
+
+
+Non-Functional Requirements
+ These describe quality or system constraints:
+1.Responsive design (mobile + desktop)
+2.Secure authentication
+3.Maintainable code (components + shadcn UI)
