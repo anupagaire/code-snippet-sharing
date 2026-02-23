@@ -2,15 +2,13 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { Input } from "../ui/input";
-import { User, Search, Menu, X, LogOut } from "lucide-react";
+import { User, Menu, X, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const router = useRouter();
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userFirstName, setUserFirstName] = useState("User");
 
@@ -21,20 +19,14 @@ const Navbar = () => {
     if (name) setUserFirstName(name.split(" ")[0]);
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!searchTerm.trim()) return;
-    router.push(`/search?query=${encodeURIComponent(searchTerm)}`);
-    setSearchTerm("");
-    setMenuOpen(false);
-  };
+
 
   const handleLogout = () => {
     // Remove the same keys that were used on login
     localStorage.removeItem("user-token");
     localStorage.removeItem("user-name");
     setIsLoggedIn(false);
-    router.push("/login");
+    router.push("/");
     setMenuOpen(false);
   };
 
@@ -66,19 +58,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      <div className="md:hidden bg-black px-4 py-2">
-        <form onSubmit={handleSearch} className="relative">
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search snippets..."
-            className="rounded-full bg-white text-black"
-          />
-          <button className="absolute right-3 top-1/2 -translate-y-1/2">
-            <Search size={18} />
-          </button>
-        </form>
-      </div>
+    
 
       {/* Desktop Navbar */}
       <nav className="hidden md:flex sticky top-0 z-50 h-16 bg-black px-20 items-center">
@@ -87,17 +67,6 @@ const Navbar = () => {
         </Link>
 
         <div className="ml-auto flex items-center gap-6">
-          <form onSubmit={handleSearch} className="relative">
-            <Input
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search snippets..."
-              className="rounded-full bg-white text-black w-56"
-            />
-            <button className="absolute right-3 top-1/2 -translate-y-1/2">
-              <Search size={18} />
-            </button>
-          </form>
 
           <Link
             href="/snippets/create"

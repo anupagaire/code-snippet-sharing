@@ -43,3 +43,6 @@ Frontend can store token in localStorage or cookies
 
 
 ### npm install prismjs(code highlighter library)
+<!-- npm install --save-dev @types/prismjs -->
+npm install react-syntax-highlighter
+npm install --save-dev @types/react-syntax-highlighter

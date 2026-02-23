@@ -17,7 +17,7 @@ Functional Requirements
   CreatedAt
   Filter snippets by language / tags
   Copy code button
-  Search by language, tags, or keyword
+  Search by language, 
 
 3.UI Features
   Syntax highlighting for code
