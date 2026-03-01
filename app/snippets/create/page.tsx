@@ -7,7 +7,6 @@ import { tomorrow } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 export default function CreateSnippet() {
   const router = useRouter();
-
   const [language, setLanguage] = useState("");
   const [customLanguage, setCustomLanguage] = useState("");
   const [codeBlock, setCodeBlock] = useState("");
@@ -20,7 +19,7 @@ export default function CreateSnippet() {
     e.preventDefault();
     setError("");
 
-    if (!finalLanguage || !codeBlock) {
+    if (!finalLanguage || !codeBlock.trim()) {
       return setError("Language and code are required");
     }
 
@@ -36,43 +35,40 @@ export default function CreateSnippet() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          language: finalLanguage,
-          codeBlock,
-        }),
+        body: JSON.stringify({ language: finalLanguage, codeBlock }),
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        return setError(data.error || "Failed to create snippet");
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Failed (${res.status})`);
       }
 
       router.push("/");
+      router.refresh(); // optional: force refresh list
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 p-6 bg-gray-100 rounded-lg">
+    <div className="max-w-3xl mx-auto mt-10 p-6 bg-gray-100 rounded-lg shadow">
       <h1 className="text-2xl font-bold mb-4">Create Snippet</h1>
 
-      {error && <p className="text-red-600 mb-3">{error}</p>}
+      {error && <p className="text-red-600 mb-4 bg-red-50 p-3 rounded">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-
         <select
           value={language}
           onChange={(e) => setLanguage(e.target.value)}
           disabled={customLanguage.trim() !== ""}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500"
         >
           <option value="">-- Choose Language --</option>
           <option value="javascript">JavaScript</option>
-          <option value="python">Python</option>
           <option value="typescript">TypeScript</option>
+          <option value="python">Python</option>
           <option value="java">Java</option>
           <option value="cpp">C++</option>
           <option value="php">PHP</option>
@@ -82,34 +78,28 @@ export default function CreateSnippet() {
 
         <input
           type="text"
-          placeholder="Or custom language (Go, Rust...)"
+          placeholder="Or custom language (Go, Rust, etc.)"
           value={customLanguage}
           onChange={(e) => setCustomLanguage(e.target.value)}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500"
         />
 
         <textarea
           value={codeBlock}
           onChange={(e) => setCodeBlock(e.target.value)}
-          rows={10}
+          rows={12}
           placeholder="Paste your code here..."
-          className="w-full p-2 border rounded font-mono"
+          className="w-full p-3 border rounded font-mono text-sm focus:ring-2 focus:ring-indigo-500"
         />
 
         {codeBlock && finalLanguage && (
-          <div>
-            <h2 className="text-sm font-semibold mb-1">
-              Live Preview
-            </h2>
-
+          <div className="mt-4">
+            <h2 className="text-sm font-semibold mb-2">Preview</h2>
             <SyntaxHighlighter
               language={finalLanguage.toLowerCase()}
               style={tomorrow}
               wrapLongLines
-              customStyle={{
-                borderRadius: "8px",
-                padding: "16px",
-              }}
+              customStyle={{ borderRadius: "8px", padding: "16px" }}
             >
               {codeBlock}
             </SyntaxHighlighter>
@@ -119,7 +109,7 @@ export default function CreateSnippet() {
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2 bg-black text-white rounded disabled:opacity-50"
+          className="px-6 py-2 bg-black text-white rounded disabled:opacity-50 hover:bg-gray-800"
         >
           {loading ? "Creating..." : "Create Snippet"}
         </button>

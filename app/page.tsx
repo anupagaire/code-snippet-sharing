@@ -8,7 +8,7 @@ interface Snippet {
   id: string;
   language: string;
   codeBlock: string;
-  author: string;
+  author: string;      // now flat string from API
   tags: string[];
   createdAt: string;
 }
@@ -17,21 +17,38 @@ export default function Home() {
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [toast, setToast] = useState("");
 
   useEffect(() => {
     fetch("/api/snippets")
-      .then((res) => res.json())
-      .then((data) => setSnippets(Array.isArray(data) ? data : []))
+      .then(async (res) => {
+        if (!res.ok) {
+          const errData = await res.json();
+          throw new Error(errData.error || `HTTP ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        const mapped = Array.isArray(data)
+          ? data.map((s: any) => ({
+              ...s,
+              createdAt: new Date(s.createdAt).toLocaleString(),
+            }))
+          : [];
+        setSnippets(mapped);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch snippets:", err);
+        setError("Could not load snippets. Please try again later.");
+      })
       .finally(() => setLoading(false));
   }, []);
 
   const filteredSnippets = snippets.filter((s) =>
     s.language.toLowerCase().includes(search.toLowerCase()) ||
     s.author.toLowerCase().includes(search.toLowerCase()) ||
-    s.tags?.some((tag) =>
-      tag.toLowerCase().includes(search.toLowerCase())
-    )
+    s.tags?.some((tag) => tag.toLowerCase().includes(search.toLowerCase()))
   );
 
   const copyToClipboard = (code: string) => {
@@ -42,9 +59,7 @@ export default function Home() {
 
   return (
     <div className="max-w-5xl mx-auto mt-10 px-4 relative">
-      <h1 className="text-3xl font-bold text-center mb-6">
-        All Snippets
-      </h1>
+      <h1 className="text-3xl font-bold text-center mb-6">All Snippets</h1>
 
       <input
         type="text"
@@ -54,17 +69,15 @@ export default function Home() {
         className="w-full mb-6 p-2 rounded border focus:ring-2 focus:ring-indigo-500"
       />
 
-      {loading && <p className="text-gray-500">Loading snippets...</p>}
-      {!loading && filteredSnippets.length === 0 && (
-        <p className="text-gray-500">No snippets found.</p>
+      {loading && <p className="text-gray-500 text-center">Loading snippets...</p>}
+      {error && <p className="text-red-600 text-center">{error}</p>}
+      {!loading && !error && filteredSnippets.length === 0 && (
+        <p className="text-gray-500 text-center">No snippets found.</p>
       )}
 
       <div className="space-y-6">
         {filteredSnippets.map((snippet) => (
-          <div
-            key={snippet.id}
-            className="bg-gray-900 rounded-lg p-4"
-          >
+          <div key={snippet.id} className="bg-gray-900 rounded-lg p-4 shadow-lg">
             <div className="flex justify-between items-center mb-2">
               <div className="text-sm text-white font-medium">
                 {snippet.language} — {snippet.author}
@@ -77,7 +90,7 @@ export default function Home() {
 
               <button
                 onClick={() => copyToClipboard(snippet.codeBlock)}
-                className="text-sm bg-white px-3 py-1 rounded"
+                className="text-sm bg-white px-3 py-1 rounded hover:bg-gray-200"
               >
                 Copy
               </button>
@@ -86,11 +99,8 @@ export default function Home() {
             <SyntaxHighlighter
               language={snippet.language.toLowerCase()}
               style={tomorrow}
-              customStyle={{
-                borderRadius: "8px",
-                padding: "16px",
-              }}
               wrapLongLines
+              customStyle={{ borderRadius: "8px", padding: "16px", margin: 0 }}
             >
               {snippet.codeBlock}
             </SyntaxHighlighter>
@@ -99,7 +109,7 @@ export default function Home() {
       </div>
 
       {toast && (
-        <div className="fixed bottom-5 right-5 bg-green-500 text-white px-4 py-2 rounded shadow-lg">
+        <div className="fixed bottom-5 right-5 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50">
           {toast}
         </div>
       )}
